@@ -1,0 +1,12 @@
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml
+  type-aliases-package: com.example.demo.entity
+
+spring:
+  datasource:
+    driver-class-name:
+    url: jdbc:mysql://localhost:3306/demo
+    username: root
+    password: cdlk1352
+debug: false
+
