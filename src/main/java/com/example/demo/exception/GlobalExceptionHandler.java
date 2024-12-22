@@ -3,12 +3,22 @@ package com.example.demo.exception;
 import com.example.demo.Resp.Resp;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @ControllerAdvice  // 表示该类是全局异常处理器
 public class GlobalExceptionHandler {
-
+    // 枚举
+    @ExceptionHandler(CustomException.class)
+    public ResponseEntity<Resp> handleCustomException(CustomException ex) {
+        Resp<String> response = new Resp<>(ex.getCode(), ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.valueOf(ex.getCode()));
+    }
     // 处理数据库异常
     @ExceptionHandler(DatabaseException.class)
     public ResponseEntity<Resp> handleDatabaseException(DatabaseException ex) {
@@ -19,6 +29,24 @@ public class GlobalExceptionHandler {
         Resp<String> response = new Resp<>(500, "Database error: " + ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    //DTO
+    @ExceptionHandler(InvalidDtoException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidDtoException(InvalidDtoException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
 
     // 处理其他运行时异常
     @ExceptionHandler(RuntimeException.class)

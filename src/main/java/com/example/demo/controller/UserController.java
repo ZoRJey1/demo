@@ -1,12 +1,16 @@
 package com.example.demo.controller;
 
+import com.example.demo.exception.CustomException;
 import com.example.demo.exception.DatabaseException;
+import com.example.demo.exception.ErrorCode;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.pojo.User;
 import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -17,16 +21,30 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/add")
-    public String addUser(@RequestBody User user) {
-        userService.save(user);
+    public String addUser(@RequestBody @Valid User user) {
+        userService.addUser(user);
         return "User added successfully";
     }
 
+//    @GetMapping("/{id}")
+//    public User getUserById(@PathVariable Long id) {
+//        if (id == null || id <= 0) {
+//            throw new DatabaseException("Invalid user ID");
+//        }
+//        return userService.getById(id);
+//    }
     @GetMapping("/{id}")
     public User getUserById(@PathVariable Long id) {
-        if (id == null || id <= 0) {
-            throw new DatabaseException("Invalid user ID");
+        if (id <= 0) {
+            throw new CustomException(ErrorCode.INVALID_USER_ID);  // 抛出自定义异常
         }
+
+        // 假设查找用户的业务逻辑
+        if (id == 999) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);  // 抛出用户未找到的异常
+        }
+
+        // 如果用户找到，返回用户信息
         return userService.getById(id);
     }
 

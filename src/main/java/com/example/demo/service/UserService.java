@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.example.demo.exception.InvalidDtoException;
 import com.example.demo.pojo.User;
 import com.example.demo.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,10 @@ public class UserService extends ServiceImpl<UserMapper, User> {
     }
 
     public boolean addUser(User user) {
+        if (user.getAge() < 18) {
+            // 如果用户年龄小于 18 岁，则抛出自定义异常
+            throw new InvalidDtoException("User age must be at least 18", 400);
+        }
         return save(user);  // MyBatis-Plus 提供的保存方法
     }
 
